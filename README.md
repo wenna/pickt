@@ -1,6 +1,6 @@
 # 拾题：错题积累 App
 
-面向小学高年级至初中，计划支持 iOS 15.5 及以上。当前交付为产品设计、技术方案与使用模拟数据的 HTML Demo V2.4；尚无原生工程、可安装 IPA 或本项目 GitHub 构建。
+面向小学高年级至初中，最低 iOS 15.5。已有产品设计、HTML Demo V2.4 和原生首轮试用版 0.1。原生测试、设备与模拟器构建已通过，IPA 需自行重签侧载；相机、纸卷与打印效果仍需设备验收。
 
 ## 项目入口
 
@@ -27,7 +27,7 @@ node work/verify-demo-v2.cjs
 
 SwiftUI + UIKit，Core Data 与本地图片文件，VisionKit 扫描、Vision 辅助 OCR，系统 PDF 与打印能力。核心无自建后端；可选模型服务不阻塞本地功能。蓝色配色与 Demo 保持一致，数据和业务规则按原生方式实现。
 
-构建沿用 StudyBuddy 的交付路径：代码推送到已确认的 GitHub 仓库，在 macOS CI 编译，下载未签名 IPA 后自行重签侧载。已接入用户指定仓库 https://github.com/wenna/pickt ，原生代码在 feat/native-mvp 分支开发，macOS CI 先执行领域测试。当前仍无可交付 IPA，原生实现状态见 docs/native-progress.md。
+构建沿用 StudyBuddy 的交付路径：代码推送到已确认的 GitHub 仓库，在 macOS CI 编译，下载未签名 IPA 后自行重签侧载。已接入用户指定仓库 https://github.com/wenna/pickt ，原生代码在 feat/native-mvp 分支开发，macOS CI 先执行领域测试。首个已核验 IPA 对应 9fdccf3，下载入口：https://github.com/wenna/pickt/actions/runs/39786707407 。原生能力和未完成项见 docs/native-progress.md。
 
 ## 本地版本管理
 

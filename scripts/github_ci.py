@@ -101,8 +101,8 @@ def main():
         jobs=api(f"/actions/runs/{args.run}/jobs")["jobs"]
         for job in jobs:
             print("JOB",job["id"],job["name"],job["conclusion"])
+            print("STEPS",[(s["name"],s["status"],s["conclusion"]) for s in job["steps"]])
             if job["conclusion"] == "failure":
-                print("STEPS",[(s["name"],s["conclusion"]) for s in job["steps"]])
                 checkid=job["check_run_url"].rsplit("/",1)[-1]
                 for annotation in api("/check-runs/"+checkid+"/annotations"):
                     print(annotation.get("message","")[:12000])

@@ -19,3 +19,5 @@
 ## 编译
 
 GitHub 开发分支 `feat/native-mvp` 的 Actions 先执行 `swift test`，再生成工程并构建未签名 IPA。下载 `Pickt-unsigned-ipa` 附件解压，获得 IPA、SHA256 和提交记录。IPA 需要自行重签侧载，不能直接无签名安装。
+
+首个已核验构建：[9fdccf3 / 版本 0.1](https://github.com/wenna/pickt/actions/runs/39786707407)。点击页面下方 Artifacts 的 `Pickt-unsigned-ipa` 下载 ZIP 并解压，再将 IPA 导入侧载工具重签。普通库首开为空，可先用手动文字题体验组卷闭环。
