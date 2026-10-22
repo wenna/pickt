@@ -54,7 +54,15 @@ public enum AnswerSpace: String, Codable, CaseIterable, Identifiable {
 public struct PaperLayout: Codable, Identifiable, Equatable {
     public var id = UUID(); public var revision: Int; public var space: AnswerSpace
     public var questionOrder: [UUID]; public var createdAt = Date()
+    public var placements: [PagePlacement] = []
     public init(revision: Int = 1, space: AnswerSpace = .medium, questionOrder: [UUID]) { self.revision=revision;self.space=space;self.questionOrder=questionOrder }
+}
+public struct PagePlacement:Codable,Equatable,Identifiable {
+    public var id=UUID();public var questionID:UUID
+    public var page:Int;public var kind:String;public var fragment:Int
+    public var x:Double;public var y:Double;public var width:Double;public var height:Double;public var offset:Double
+    public var text:String
+    public init(questionID:UUID,page:Int,kind:String,fragment:Int = -1,x:Double,y:Double,width:Double,height:Double,offset:Double = 0,text:String = "") { self.questionID=questionID;self.page=page;self.kind=kind;self.fragment=fragment;self.x=x;self.y=y;self.width=width;self.height=height;self.offset=offset;self.text=text }
 }
 public struct GradingItem: Codable, Identifiable, Equatable {
     public var questionID: UUID; public var recognized = ""; public var verdict: Verdict?; public var reviewed = false

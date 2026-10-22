@@ -38,3 +38,5 @@ V2.4 基线已保存为独立提交，后续每个完成的逻辑改动均有独
 ## 原生开发
 
 实施计划见 [原生实施计划](docs/superpowers/plans/2026-10-22-native-mvp.md)，当前状态见 [开发记录](docs/native-progress.md)。macOS / Xcode 环境执行 `swift test`；Windows 当前没有 Swift/Xcode，使用 GitHub Actions 执行。
+
+首轮原生操作及实现边界见 [试用说明](docs/native-user-guide.md)。生成工程：`python3 scripts/generate_project.py`；macOS 编译：`xcodebuild -project Pickt.xcodeproj -scheme Pickt -sdk iphoneos -configuration Release CODE_SIGNING_ALLOWED=NO build`。CI 输出未签名 IPA，完整 App 编译状态以 Actions 记录为准。

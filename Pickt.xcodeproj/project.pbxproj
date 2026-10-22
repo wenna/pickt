@@ -1,0 +1,43 @@
+// !$*UTF8*$!
+{ archiveVersion = 1; classes = {}; objectVersion = 56; objects = {
+98A2B25688A649A58FD32DF1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PicktApp/AppStore.swift"; sourceTree = "<group>"; };
+B7C3B9138F7F588F8ABED253 = { isa = PBXBuildFile; fileRef = 98A2B25688A649A58FD32DF1; };
+A580ABA3947B31400DB9B958 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PicktApp/GradingViews.swift"; sourceTree = "<group>"; };
+089FDCE0F31895087A85E527 = { isa = PBXBuildFile; fileRef = A580ABA3947B31400DB9B958; };
+BFB37E88871D9F58EE5BB6F0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PicktApp/PDFService.swift"; sourceTree = "<group>"; };
+4E608257FB870AF49CBDAD34 = { isa = PBXBuildFile; fileRef = BFB37E88871D9F58EE5BB6F0; };
+5057FB9C54C79EF04FDFF731 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PicktApp/PicktApp.swift"; sourceTree = "<group>"; };
+DF21DE103DAACB1E9B2EF128 = { isa = PBXBuildFile; fileRef = 5057FB9C54C79EF04FDFF731; };
+F99308A97FCDC1D70CDAF763 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PicktApp/PracticeViews.swift"; sourceTree = "<group>"; };
+B2C7FA9EB9E9C226152FB5A8 = { isa = PBXBuildFile; fileRef = F99308A97FCDC1D70CDAF763; };
+D0FD8DAF154C9BFD882A607B = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PicktApp/QuestionViews.swift"; sourceTree = "<group>"; };
+3BF2381C5A58721062CA1536 = { isa = PBXBuildFile; fileRef = D0FD8DAF154C9BFD882A607B; };
+B8EFBA722977CFB44D7E883C = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PicktApp/ScanViews.swift"; sourceTree = "<group>"; };
+F684BED0B00D7FD2AA3A6DFC = { isa = PBXBuildFile; fileRef = B8EFBA722977CFB44D7E883C; };
+BC05D7AC0D3340FAB88EBE5A = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PicktApp/SettingsViews.swift"; sourceTree = "<group>"; };
+07B277DE6B0FB3AF71AAEEB1 = { isa = PBXBuildFile; fileRef = BC05D7AC0D3340FAB88EBE5A; };
+FF927CDA2F64B10788D3EA49 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/PicktCore/Filtering.swift"; sourceTree = "<group>"; };
+7E60A24A9931EEA302A36149 = { isa = PBXBuildFile; fileRef = FF927CDA2F64B10788D3EA49; };
+4316275E6C3502C261D51DD7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/PicktCore/LibraryCommands.swift"; sourceTree = "<group>"; };
+F2B5501FDA9D92560131D932 = { isa = PBXBuildFile; fileRef = 4316275E6C3502C261D51DD7; };
+884595BEE66FF212B108CEDD = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/PicktCore/Models.swift"; sourceTree = "<group>"; };
+920469387F5275F7C1677240 = { isa = PBXBuildFile; fileRef = 884595BEE66FF212B108CEDD; };
+1D0D93F6AE81859FCF881D3B = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/PicktCore/Module.swift"; sourceTree = "<group>"; };
+5819C0F3573A8718BA83DA25 = { isa = PBXBuildFile; fileRef = 1D0D93F6AE81859FCF881D3B; };
+EEDBC7CB1094572B2C754230 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/PicktPersistence/AssetStore.swift"; sourceTree = "<group>"; };
+F16CCC6618818F433A5A2820 = { isa = PBXBuildFile; fileRef = EEDBC7CB1094572B2C754230; };
+83E444E758EFA9DBF48930F9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/PicktPersistence/BackupArchive.swift"; sourceTree = "<group>"; };
+210390470F961DED7AA9A74E = { isa = PBXBuildFile; fileRef = 83E444E758EFA9DBF48930F9; };
+2CD3CA3F183098DCB88FEB95 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/PicktPersistence/CoreDataRepository.swift"; sourceTree = "<group>"; };
+89E4C233E4A08ACA0A81B8BA = { isa = PBXBuildFile; fileRef = 2CD3CA3F183098DCB88FEB95; };
+38A007151ABE87CC01A5B6E9 = { isa = PBXFileReference; explicitFileType = wrapper.application; path = Pickt.app; sourceTree = BUILT_PRODUCTS_DIR; };
+FBDC4F23F93125BBEEAE800C = { isa = PBXGroup; children = (38A007151ABE87CC01A5B6E9,); name = Products; sourceTree = "<group>"; };
+64292B1C2B2E13EAD8788FC8 = { isa = PBXGroup; children = (98A2B25688A649A58FD32DF1,A580ABA3947B31400DB9B958,BFB37E88871D9F58EE5BB6F0,5057FB9C54C79EF04FDFF731,F99308A97FCDC1D70CDAF763,D0FD8DAF154C9BFD882A607B,B8EFBA722977CFB44D7E883C,BC05D7AC0D3340FAB88EBE5A,FF927CDA2F64B10788D3EA49,4316275E6C3502C261D51DD7,884595BEE66FF212B108CEDD,1D0D93F6AE81859FCF881D3B,EEDBC7CB1094572B2C754230,83E444E758EFA9DBF48930F9,2CD3CA3F183098DCB88FEB95,FBDC4F23F93125BBEEAE800C,); sourceTree = "<group>"; };
+BCE16DD0260827ECF338C787 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B7C3B9138F7F588F8ABED253,089FDCE0F31895087A85E527,4E608257FB870AF49CBDAD34,DF21DE103DAACB1E9B2EF128,B2C7FA9EB9E9C226152FB5A8,3BF2381C5A58721062CA1536,F684BED0B00D7FD2AA3A6DFC,07B277DE6B0FB3AF71AAEEB1,7E60A24A9931EEA302A36149,F2B5501FDA9D92560131D932,920469387F5275F7C1677240,5819C0F3573A8718BA83DA25,F16CCC6618818F433A5A2820,210390470F961DED7AA9A74E,89E4C233E4A08ACA0A81B8BA,); runOnlyForDeploymentPostprocessing = 0; };
+0189424A5A60FED329FA868E = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+369E70E1EE7A07C74E211771 = { isa = XCBuildConfiguration; buildSettings = { IPHONEOS_DEPLOYMENT_TARGET = 15.5; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; PRODUCT_NAME = Pickt; PRODUCT_BUNDLE_IDENTIFIER = com.wenna.pickt; INFOPLIST_FILE = PicktApp/Info.plist; CURRENT_PROJECT_VERSION = 1; MARKETING_VERSION = 0.1; CODE_SIGN_STYLE = Automatic; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
+502D350B1D76FA1259FFDE36 = { isa = XCBuildConfiguration; buildSettings = { IPHONEOS_DEPLOYMENT_TARGET = 15.5; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; PRODUCT_NAME = Pickt; PRODUCT_BUNDLE_IDENTIFIER = com.wenna.pickt; INFOPLIST_FILE = PicktApp/Info.plist; CURRENT_PROJECT_VERSION = 1; MARKETING_VERSION = 0.1; CODE_SIGN_STYLE = Automatic; SWIFT_OPTIMIZATION_LEVEL = "-O"; }; name = Release; };
+E30856D4D988D9571DE7D610 = { isa = XCConfigurationList; buildConfigurations = (369E70E1EE7A07C74E211771,502D350B1D76FA1259FFDE36,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+0E8A3AD980EC179856012B7E = { isa = PBXNativeTarget; buildConfigurationList = E30856D4D988D9571DE7D610; buildPhases = (BCE16DD0260827ECF338C787,0189424A5A60FED329FA868E,); buildRules = (); dependencies = (); name = Pickt; productName = Pickt; productReference = 38A007151ABE87CC01A5B6E9; productType = "com.apple.product-type.application"; };
+98F54143AB4E86B28C3AFEE0 = { isa = PBXProject; attributes = { LastUpgradeCheck = 1640; }; buildConfigurationList = E30856D4D988D9571DE7D610; compatibilityVersion = "Xcode 14.0"; developmentRegion = zh_CN; hasScannedForEncodings = 0; knownRegions = (en,Base,zh_CN); mainGroup = 64292B1C2B2E13EAD8788FC8; productRefGroup = FBDC4F23F93125BBEEAE800C; projectDirPath = ""; projectRoot = ""; targets = (0E8A3AD980EC179856012B7E,); };
+}; rootObject = 98F54143AB4E86B28C3AFEE0; }

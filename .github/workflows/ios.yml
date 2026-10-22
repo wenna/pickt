@@ -16,3 +16,23 @@ jobs:
         run: xcodebuild -version && swift --version
       - name: Domain and persistence tests
         run: swift test
+      - name: Generate project
+        run: python3 scripts/generate_project.py
+      - name: Build unsigned iPhone app
+        run: xcodebuild -project Pickt.xcodeproj -scheme Pickt -configuration Release -sdk iphoneos -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
+      - name: Package IPA
+        run: |
+          mkdir -p build/ipa/Payload
+          cp -R build/DerivedData/Build/Products/Release-iphoneos/Pickt.app build/ipa/Payload/
+          cd build/ipa
+          zip -qr ../Pickt-unsigned.ipa Payload
+          cd ..
+          shasum -a 256 Pickt-unsigned.ipa > SHA256SUMS.txt
+          printf 'Commit: %s\nMinimum iOS: 15.5\nUnsigned: re-sign before sideloading\n' "$GITHUB_SHA" > BUILD.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pickt-unsigned-ipa
+          path: |
+            build/Pickt-unsigned.ipa
+            build/SHA256SUMS.txt
+            build/BUILD.txt
