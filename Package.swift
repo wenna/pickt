@@ -4,9 +4,11 @@ import PackageDescription
 let package = Package(
     name: "Pickt",
     platforms: [.iOS("15.5"), .macOS(.v12)],
-    products: [.library(name: "PicktCore", targets: ["PicktCore"])],
+    products: [.library(name: "PicktCore", targets: ["PicktCore"]), .library(name: "PicktPersistence", targets: ["PicktPersistence"])],
     targets: [
         .target(name: "PicktCore"),
-        .testTarget(name: "PicktCoreTests", dependencies: ["PicktCore"])
+        .testTarget(name: "PicktCoreTests", dependencies: ["PicktCore"]),
+        .target(name: "PicktPersistence", dependencies: ["PicktCore"]),
+        .testTarget(name: "PicktPersistenceTests", dependencies: ["PicktPersistence", "PicktCore"])
     ]
 )

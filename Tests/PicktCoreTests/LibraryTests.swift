@@ -118,4 +118,15 @@ final class LibraryTests: XCTestCase {
         XCTAssertFalse(AssetName.isValid("../secret.jpg")); XCTAssertFalse(AssetName.isValid("C:/a.jpg"))
         XCTAssertFalse(AssetName.isValid("folder/a.jpg")); XCTAssertTrue(AssetName.isValid(UUID().uuidString + ".jpg"))
     }
+    func testMissingBankQuestionPreventsConfirmationAndRestore() throws {
+        var value=try skippedLibrary();let missing=value.questions.removeFirst()
+        XCTAssertThrowsError(try LibraryCommands.validate(value))
+        value.questions=[missing];value.papers[0].attempts=[]
+        try LibraryCommands.beginGrading(in:&value,paperID:value.papers[0].id,layoutID:value.papers[0].layouts[0].id,photoAssets:[],now:now)
+        value.papers[0].draft!.items[0].verdict = .correct;value.papers[0].draft!.items[0].reviewed=true
+        let attemptID=value.papers[0].draft!.id;value.questions=[]
+        XCTAssertThrowsError(try LibraryCommands.confirmGrading(in:&value,paperID:value.papers[0].id,attemptID:attemptID,now:now))
+        XCTAssertNotNil(value.papers[0].draft);XCTAssertTrue(value.papers[0].attempts.isEmpty)
+    }
+    func testExcessPrecisionNeedsReview() { XCTAssertEqual(AnswerComparison.compare("123456789012345678901",reference:"123456789012345678902"),.needsReview) }
 }
