@@ -1,0 +1,18 @@
+name: iOS Tests and IPA
+on:
+  push:
+    branches: [main, feat/native-mvp]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: xcodebuild -version && swift --version
+      - name: Domain and persistence tests
+        run: swift test

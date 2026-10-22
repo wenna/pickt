@@ -27,10 +27,14 @@ node work/verify-demo-v2.cjs
 
 SwiftUI + UIKit，Core Data 与本地图片文件，VisionKit 扫描、Vision 辅助 OCR，系统 PDF 与打印能力。核心无自建后端；可选模型服务不阻塞本地功能。蓝色配色与 Demo 保持一致，数据和业务规则按原生方式实现。
 
-构建沿用 StudyBuddy 的交付路径：代码推送到已确认的 GitHub 仓库，在 macOS CI 编译，下载未签名 IPA 后自行重签侧载。当前仅完成本地仓库初始化，未配置远程地址；原生开发阶段再创建本项目 workflow。
+构建沿用 StudyBuddy 的交付路径：代码推送到已确认的 GitHub 仓库，在 macOS CI 编译，下载未签名 IPA 后自行重签侧载。已接入用户指定仓库 https://github.com/wenna/pickt ，原生代码在 feat/native-mvp 分支开发，macOS CI 先执行领域测试。当前仍无可交付 IPA，原生实现状态见 docs/native-progress.md。
 
 ## 本地版本管理
 
 V2.4 基线已保存为独立提交，后续每个完成的逻辑改动均有独立提交。查看记录使用 `git log --oneline`，查看改动使用 `git show <提交号>`；撤回已提交改动优先使用新增 revert 提交。
 
 不要提交真实试卷、个人学习资料、API 密钥和签名文件。`.gitignore` 已排除本地资料目录、密钥、证书、IPA 和常见构建产物；示例文件仍应人工确认只包含虚构内容。
+
+## 原生开发
+
+实施计划见 [原生实施计划](docs/superpowers/plans/2026-10-22-native-mvp.md)，当前状态见 [开发记录](docs/native-progress.md)。macOS / Xcode 环境执行 `swift test`；Windows 当前没有 Swift/Xcode，使用 GitHub Actions 执行。
