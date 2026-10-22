@@ -1,0 +1,46 @@
+const fs=require('fs'),vm=require('vm');
+const basePath='work/demo-v1-base.html';
+if(!fs.existsSync(basePath))fs.copyFileSync('outputs/shiti-demo.html',basePath);
+const base=fs.readFileSync(basePath,'utf8');
+const original=base.match(/<script>([\s\S]*?)<\/script>/)[1];
+const common=original.slice(0,original.indexOf('const STORAGE_KEY='));
+const keep=['questionHTML','appHeader','notice','scan','capture','saved','attachDrag'].map(name=>{
+ const match=original.match(new RegExp('^function '+name+'\\([^\\n]*$','m'));if(!match)throw Error('Missing reusable view: '+name);return match[0];
+}).join('\n');
+let runtime=fs.readFileSync('work/v2-runtime.js','utf8');
+runtime=runtime.replace(/^function freshData\(/m,'function freshDataV2Base(');
+runtime=runtime.replace(/^function library\(/m,'function libraryV2Base(').replace(/^function detail\(/m,'function detailV2Base(');
+runtime=runtime.replace(/^function practice\(/m,'function practiceV2Base(').replace(/^function preview\(/m,'function previewV2Base(').replace(/^function eligible\(/m,'function eligibleV2Base(').replace(/^function settings\(/m,'function settingsV2Base(').replace(/^function gradeResults\(/m,'function gradeResultsV2Base(');
+runtime=runtime.replace('reviewDone,settings};','reviewDone,settings,trash};').replace('const pending=data.questions.filter','const pending=activeQuestions().filter');
+runtime=runtime.replace('${data.questions.length} 道题 · ${data.papers.length} 份练习卷','${activeQuestions().length} 道题 · ${activePapers().length} 份练习卷');
+runtime=runtime.replace("q.topic=q.topics[0]||'待分类';q.cause=q.causes[0]||'';","q.topic=q.topics[0]||'待分类';q.cause=q.causes[0]||'';q.classification={...(q.classification||{}),state:'manual'};");
+runtime=runtime.replace('演示 V2</span>','演示 V2.4</span>');
+runtime=runtime.replace('恢复到新的 8 道示例题','恢复到 11 道示例题和 4 份练习卷').replace('已恢复 V2 初始示例','已恢复 V2.4 体验示例');
+runtime=runtime.replace('<button class="btn primary full" data-action="start-review">${icon(\'camera\')} ${p.completed?\'查看批改记录\':\'拍完成卷，记录结果\'}</button>','<button class="btn primary full" data-action="${p.gradingDraft?\'resume-grading\':\'start-review\'}" data-id="${p.id}">${icon(\'camera\')} ${p.gradingDraft?\'继续核对批改结果\':p.completed?\'查看批改记录\':\'拍完成卷，记录结果\'}</button>');
+runtime=runtime.replace("${p.completed?'<button class=\"btn full\"", "${p.completed&&!p.gradingDraft?'<button class=\"btn full\"");
+const startup=runtime.indexOf('try{document.getElementById(\'brand-icon\')');
+if(startup<0)throw Error('Missing startup');
+let extensions=fs.readFileSync('work/v21-functions.js','utf8');
+extensions=extensions.replace(/^function migrateData\(/m,'function migrateDataV21Base(').replace(/^function library\(/m,'function libraryV21View(').replace(/^function libraryQuestions\(/m,'function libraryQuestionsV21Base(').replace(/^function cards\(/m,'function cardsV21Base(').replace(/^function detail\(/m,'function detailV21View(');
+const newest=fs.readFileSync('work/v22-functions.js','utf8')+'\n'+fs.readFileSync('work/v24-demo-data.js','utf8');
+const script=common+'\n'+runtime.slice(0,startup)+'\n'+keep+'\n'+extensions+'\n'+newest+'\n'+runtime.slice(startup);
+new vm.Script(script);
+const extraCSS=fs.readFileSync('work/v2-extra.css','utf8');
+let output=base.replace(/<script>[\s\S]*?<\/script>/,'<script>\n'+script+'\n</script>').replace('</style>',extraCSS+'\n</style>').replace('拾题 · 错题积累 App 交互演示','拾题 V2.4 · 蓝色主题与批量管理').replace('界面与流程演示 <span','界面演示 V2.4 <span').replace('拍试卷 → 选择两道题 → 保存分类 → 练一练 → 组卷预览 → 记录结果','生成练习卷 → 打印后做题 → 我的练习卷 → 拍完成卷 → 核对入库').replace('交互原型，尚未接入扫描、识别或 AI 服务','V2.4 交互原型 · 自动分类与拍卷批改均为模拟');
+// Recolor the previous green tints without changing warning, error or paper colors.
+output=output.replace(/#[0-9a-f]{6}(?:[0-9a-f]{2})?\b/gi,color=>{
+ const [r,g,b]=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16));
+ if(!(g>r&&g>b))return color;
+ const lightness=(Math.max(r,g,b)+Math.min(r,g,b))/510;
+ const saturation=lightness>.8?.5:lightness<.3?.3:.35;
+ const c=(1-Math.abs(2*lightness-1))*saturation,x=c*(1-Math.abs((211/60)%2-1)),m=lightness-c/2;
+ return '#'+[0,x,c].map(v=>Math.round((v+m)*255).toString(16).padStart(2,'0')).join('')+color.slice(7);
+});
+output=output.replace('</style>',fs.readFileSync('work/theme-blue.css','utf8')+'\n</style>');
+fs.writeFileSync('outputs/shiti-demo.html',output);
+fs.writeFileSync('outputs/shiti-demo-v2.html',output);
+fs.writeFileSync('outputs/shiti-demo-v2.1.html',output);
+fs.writeFileSync('outputs/shiti-demo-v2.2.html',output);
+fs.writeFileSync('outputs/shiti-demo-v2.3.html',output);
+fs.writeFileSync('outputs/shiti-demo-v2.4.html',output);
+console.log('Built standalone V2.4 demo:',Buffer.byteLength(output),'bytes.');

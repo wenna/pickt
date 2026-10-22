@@ -1,0 +1,35 @@
+/* Visual tokens are shared design references for the later native iOS App. */
+:root{--accent:#246bd4;--accent-dark:#194d9c;--green:var(--accent);--green-dark:var(--accent-dark);--mint:#eaf3ff;--ink:#213952;--muted:#61768c;--line:#dce7f2;--cream:#f5f9ff;--shadow:0 24px 80px #214d7b12;background:#eef5fc;color:var(--ink)}
+.hero{background:linear-gradient(135deg,#e3efff,#edf7ff)}
+.device{border-color:#253b54;box-shadow:0 28px 65px #23496f20,0 0 0 1px #18324d}
+.island,.home-indicator{background:#253b54}
+.demo-sample-banner{background:#edf5ff;border:1px solid #d0e2fa;border-radius:14px;padding:13px;margin:0 0 16px}
+.demo-sample-banner strong{font-size:12px;color:#28588f}
+.demo-sample-banner p{font-size:11px;line-height:1.8;color:#536d89;margin:5px 0 8px}
+.demo-sample-banner>div{display:flex;flex-wrap:wrap;gap:7px 14px}
+.demo-sample-banner .text-button{font-size:11px;min-height:32px}
+.paper-management-bar{margin:8px 0 14px;font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.paper-manage-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:15px 0 12px}
+.paper-manage-heading h3{font-size:15px}
+.paper-manage-tools{display:flex;gap:10px;align-items:center}
+.paper-manage-tools .text-button{font-size:11px;min-height:36px}
+.paper-tile.manage-mode{position:relative;padding-left:40px}
+.paper-tile.manage-mode .paper-tile-main{padding:14px 12px 14px 8px}
+.paper-tile.manage-mode .paper-tile-actions{padding-left:8px}
+.paper-select-toggle{position:absolute;left:0;top:0;width:40px;height:100%;display:flex;justify-content:center;align-items:flex-start;padding-top:20px;border-right:1px solid var(--line)}
+.paper-select-toggle .check{width:22px;height:22px;border-radius:7px;border:1.5px solid #93afd1;color:transparent;display:grid;place-items:center;font-size:13px;background:white}
+.paper-select-toggle[aria-pressed=true] .check{background:var(--accent);border-color:var(--accent);color:white}
+.paper-select-toggle:disabled{opacity:1;background:#f3f6fa}
+.paper-select-toggle:disabled .check{border-color:#cbd7e3;background:#e7edf4}
+.paper-sample-note{font-size:10px;color:#5b7592;margin-bottom:7px}
+.paper-delete-summary{font-size:11px;line-height:1.7}
+.paper-delete-summary small{display:block;font-size:10px;color:var(--muted)}
+.manage-footer .btn{font-size:11px;min-height:42px}
+.paper-delete-help{font-size:11px;line-height:1.8;color:var(--muted);margin:4px 0 11px}
+#paper-delete-footer{position:sticky;top:49px;z-index:3;background:var(--cream)}
+#paper-delete-footer:empty{display:none}
+#paper-delete-footer .sticky-action{position:static;margin:0;padding:7px 0;background:var(--cream)}
+.tag{color:#3d6591;background:#edf4fc}
+.tag.gray{color:#65778b;background:#eef2f7}
+.tag.orange{color:#926432;background:#fff3e4}
+@media(max-width:560px){.screen{padding-left:16px;padding-right:16px}.paper-manage-tools{gap:6px}}

@@ -1,0 +1,29 @@
+# Native build outputs and per-user editor state
+.DS_Store
+Thumbs.db
+DerivedData/
+build/
+.build/
+.swiftpm/
+xcuserdata/
+*.xcuserstate
+*.xcarchive/
+*.ipa
+
+# Credentials and local personal study data must not enter the repository
+.env
+.env.*
+!.env.example
+*.p12
+*.p8
+*.mobileprovision
+*.cer
+.secrets/
+.local-data/
+
+# Dependencies, caches and temporary files
+node_modules/
+__pycache__/
+*.pyc
+.cache/
+tmp/
