@@ -56,6 +56,13 @@ public struct PaperLayout: Codable, Identifiable, Equatable {
     public var questionOrder: [UUID]; public var createdAt = Date()
     public var placements: [PagePlacement] = []
     public init(revision: Int = 1, space: AnswerSpace = .medium, questionOrder: [UUID]) { self.revision=revision;self.space=space;self.questionOrder=questionOrder }
+    enum CodingKeys:String,CodingKey { case id,revision,space,questionOrder,createdAt,placements }
+    public init(from decoder:Decoder)throws {
+        let c=try decoder.container(keyedBy:CodingKeys.self)
+        id=try c.decode(UUID.self,forKey:.id);revision=try c.decode(Int.self,forKey:.revision);space=try c.decode(AnswerSpace.self,forKey:.space)
+        questionOrder=try c.decode([UUID].self,forKey:.questionOrder);createdAt=try c.decode(Date.self,forKey:.createdAt)
+        placements=try c.decodeIfPresent([PagePlacement].self,forKey:.placements) ?? []
+    }
 }
 public struct PagePlacement:Codable,Equatable,Identifiable {
     public var id=UUID();public var questionID:UUID

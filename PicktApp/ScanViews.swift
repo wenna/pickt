@@ -108,10 +108,10 @@ struct CaptureFlow:View {
             Picker("原卷页",selection:$page){ForEach(images.indices,id:\.self){Text("第 \($0+1) 页").tag($0)}}.pickerStyle(.segmented).onChange(of:page){_ in rect=NormalizedRect()}
             CropCanvas(image:images[page],rect:$rect).background(Color.secondary.opacity(0.08)).frame(maxWidth:.infinity,maxHeight:.infinity)
             HStack{Button("旋转本页"){images[page]=images[page].rotated();originalNames[page]=nil;rect=NormalizedRect()};Spacer();Button(processing ? "正在读取…" : "加入当前题片段"){addFragment()}.disabled(processing)}
-            ScrollView(.horizontal){HStack{ForEach(Array(draft.fragments.enumerated()),id:\.element.id){index,fragment in Button{editingFragment=index}label:{VStack{AssetImage(name:fragment.asset).frame(width:90,height:70);Text("片段 \(index+1) · 可遮盖").font(.caption2)}}}}.frame(height:draft.fragments.isEmpty ? 0 : 100)
+            ScrollView(.horizontal){HStack{ForEach(Array(draft.fragments.enumerated()),id:\.element.id){index,fragment in Button{editingFragment=index}label:{VStack{AssetImage(name:fragment.asset).frame(width:90,height:70);Text("片段 \(index+1) · 可遮盖").font(.caption2)}}}}}.frame(height:draft.fragments.isEmpty ? 0 : 100)
             Button("下一步：分类保存（\(draft.fragments.count) 个片段）"){editor=true}.buttonStyle(.borderedProminent).disabled(draft.fragments.isEmpty || processing)
             Text("已保存 \(savedCount) 道题，保存后可继续选下一题").font(.caption).foregroundColor(.secondary)
-        }.padding().navigationTitle("从试卷中选错题").navigationBarTitleDisplayMode(.inline).toolbar{ToolbarItem(placement:.cancellationAction){Button("完成"){finish()}}}
+        }.padding().navigationTitle("从试卷中选错题").navigationBarTitleDisplayMode(.inline).toolbar{ToolbarItem(placement:.cancellationAction){Button("完成"){finish()}}}}
         .navigationViewStyle(.stack)
         .sheet(isPresented:$editor){QuestionEditor(question:draft){question in
             do { for index in images.indices where originalNames[index] == nil { originalNames[index]=try store.saveImage(images[index]) } } catch { store.error=error.localizedDescription;return false }
@@ -146,7 +146,7 @@ final class CropSurface:UIView,UIScrollViewDelegate {
     var changed:((NormalizedRect)->Void)?
     override init(frame:CGRect){super.init(frame:frame);addSubview(scroll);scroll.addSubview(picture);scroll.delegate=self;scroll.panGestureRecognizer.minimumNumberOfTouches=2;picture.isUserInteractionEnabled=true;picture.layer.addSublayer(selectionLayer);selectionLayer.strokeColor=UIColor.systemBlue.cgColor;selectionLayer.fillColor=UIColor.systemBlue.withAlphaComponent(0.12).cgColor;let pan=UIPanGestureRecognizer(target:self,action:#selector(selectArea(_:)));pan.maximumNumberOfTouches=1;picture.addGestureRecognizer(pan)}
     required init?(coder:NSCoder){fatalError("init(coder:) is unsupported")}
-    func set(image:UIImage,selection:NormalizedRect){if picture.image !== image{picture.image=image;picture.frame=CGRect(origin:.zero,size:image.size);needsFit=true};selected=selection;setNeedsLayout()}
+    func set(image:UIImage,selection:NormalizedRect){if picture.image !== image{scroll.minimumZoomScale=min(scroll.minimumZoomScale,1);scroll.maximumZoomScale=max(scroll.maximumZoomScale,1);scroll.setZoomScale(1,animated:false);picture.transform = .identity;picture.image=image;picture.bounds=CGRect(origin:.zero,size:image.size);picture.center=CGPoint(x:image.size.width/2,y:image.size.height/2);scroll.contentSize=image.size;scroll.contentOffset = .zero;needsFit=true};selected=selection;setNeedsLayout()}
     override func layoutSubviews(){super.layoutSubviews();scroll.frame=bounds;if needsFit,bounds.width>0,bounds.height>0,let image=picture.image{let scale=min(bounds.width/image.size.width,bounds.height/image.size.height);scroll.minimumZoomScale=scale;scroll.maximumZoomScale=scale*6;scroll.zoomScale=scale;needsFit=false};drawSelection()}
     func viewForZooming(in scrollView:UIScrollView)->UIView?{picture}
     func scrollViewDidZoom(_ scrollView:UIScrollView){drawSelection()}

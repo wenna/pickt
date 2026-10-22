@@ -60,4 +60,8 @@ git diff --check
 
 行为改动需增加能捕获真实问题的检查，重点覆盖状态变化、整批失败、草稿恢复、幂等确认、迁移及历史不丢失。不要只断言实现中某行代码存在。纯文档改动检查内容一致性、文件链接及差异即可；只有相关范围受影响时才重建 Demo。
 
-UI 改动应在实际浏览器检查窄/宽窗口、底部导航及长列表操作栏，并保留清楚的验证记录。浏览器脚本检查不代表 iOS 真机、真实相机、OCR 或打印机已验收。原生工程创建后，应补充真实的测试及 CI 命令；当前没有 Xcode 工程，不得虚报原生测试通过。
+Demo UI 改动应在实际浏览器检查窄/宽窗口、底部导航及长列表操作栏，并保留清楚的验证记录。浏览器脚本检查不代表 iOS 真机、真实相机、OCR 或打印机已验收。
+
+## 原生验证
+
+原生源码位于 `PicktApp/`、`Sources/`，测试位于 `Tests/`。在 macOS 执行 `swift test`。`python3 scripts/generate_project.py` 生成可追踪的 `Pickt.xcodeproj`；添加原生文件后重新生成。编译命令：`xcodebuild -project Pickt.xcodeproj -scheme Pickt -configuration Release -sdk iphoneos -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build`。CI 位于 `.github/workflows/ios.yml`，产物为未签名 IPA 和提交/SHA256 清单。Windows 静态检查不能代替这些原生验证。试用说明和已知限制在 `docs/native-user-guide.md`，不要把编译通过当作真机交互通过。

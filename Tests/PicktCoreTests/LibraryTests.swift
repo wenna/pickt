@@ -129,4 +129,13 @@ final class LibraryTests: XCTestCase {
         XCTAssertNotNil(value.papers[0].draft);XCTAssertTrue(value.papers[0].attempts.isEmpty)
     }
     func testExcessPrecisionNeedsReview() { XCTAssertEqual(AnswerComparison.compare("123456789012345678901",reference:"123456789012345678902"),.needsReview) }
+    func testLegacyLayoutDecodesWithoutPlacementsAndRoundTripsNewPlan() throws {
+        let layout=PaperLayout(questionOrder:[UUID()])
+        let data=try JSONEncoder().encode(layout)
+        var json=try XCTUnwrap(JSONSerialization.jsonObject(with:data) as? [String:Any]);json.removeValue(forKey:"placements")
+        let old=try JSONDecoder().decode(PaperLayout.self,from:JSONSerialization.data(withJSONObject:json))
+        XCTAssertEqual(old.id,layout.id);XCTAssertTrue(old.placements.isEmpty)
+        var updated=old;updated.placements=[PagePlacement(questionID:old.questionOrder[0],page:0,kind:"text",x:36,y:100,width:523,height:20,text:"question")]
+        XCTAssertEqual(try JSONDecoder().decode(PaperLayout.self,from:JSONEncoder().encode(updated)),updated)
+    }
 }

@@ -14,6 +14,11 @@ enum PDFService {
             if y+height>bottom{nextPage()}
             plan.append(PagePlacement(questionID:question,page:page,kind:kind,fragment:fragment,x:left,y:y,width:width,height:height,offset:offset,text:text));y+=height
         }
+        for q in paper.questions {
+            let texts=q.fragments.isEmpty ? chunk(q.text,limit:500):[]
+            let references=parent ? chunk(q.answer+"\n"+q.explanation,limit:500):[]
+            guard (texts+references).allSatisfy({textHeight($0,font:.systemFont(ofSize:14))<bottom-top-50}) else { throw LibraryError("题干或解析换行过多，单段超出一页。请缩短文字或使用题图后重新生成，避免打印截断。") }
+        }
         for (index,id) in layout.questionOrder.enumerated() {
             guard let q=paper.questions.first(where:{$0.id==id})else{throw LibraryError("卷面题目顺序损坏")}
             if bottom-y<160{nextPage()}

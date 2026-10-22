@@ -19,6 +19,13 @@ import urllib.request
 
 REPO = "wenna/pickt"
 
+class SafeRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self,request,fp,code,msg,headers,newurl):
+        redirected=super().redirect_request(request,fp,code,msg,headers,newurl)
+        if redirected is not None and urllib.parse.urlparse(newurl).netloc != "api.github.com":
+            redirected.remove_header("Authorization")
+        return redirected
+
 def git(*args):
     return subprocess.check_output(["git", *args])
 
@@ -38,6 +45,7 @@ def main():
     parser.add_argument("--run", type=int)
     args = parser.parse_args()
     auth = login()
+    opener=urllib.request.build_opener(SafeRedirect())
     def api(path, data=None, method=None, raw=False):
         request = urllib.request.Request("https://api.github.com/repos/" + REPO + path,
             data=None if data is None else json.dumps(data).encode(), method=method,
@@ -45,7 +53,7 @@ def main():
         # urllib uses the existing Windows Internet Settings proxy; no global change.
         for attempt in range(3):
             try:
-                with urllib.request.urlopen(request, timeout=25) as response:
+                with opener.open(request, timeout=25) as response:
                     body=response.read()
                 return body if raw else json.loads(body)
             except (urllib.error.URLError, http.client.RemoteDisconnected, TimeoutError):
@@ -66,6 +74,10 @@ def main():
         for job in jobs:
             print("JOB",job["id"],job["name"],job["conclusion"])
             if job["conclusion"] == "failure":
+                print("STEPS",[(s["name"],s["conclusion"]) for s in job["steps"]])
+                checkid=job["check_run_url"].rsplit("/",1)[-1]
+                for annotation in api("/check-runs/"+checkid+"/annotations"):
+                    print(annotation.get("message","")[:12000])
                 text=api(f'/actions/jobs/{job["id"]}/logs',raw=True).decode("utf-8",errors="replace")
                 lines=text.splitlines()
                 print("\n".join(line for line in lines if "error:" in line.lower() or "failed" in line.lower())[-10000:])
@@ -81,6 +93,8 @@ def main():
         try:
             api("/git/commits/"+commit)
             print("EXISTS",commit[:7],flush=True)
+            # Known local trees have the exact SHA already verified on GitHub.
+            cache.update(line.split()[2].decode() for line in git("ls-tree","-r",commit).splitlines() if line.split()[1]==b"blob")
             continue
         except urllib.error.HTTPError as error:
             if error.code != 404: raise
