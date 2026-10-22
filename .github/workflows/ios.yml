@@ -29,6 +29,10 @@ jobs:
           cd ..
           shasum -a 256 Pickt-unsigned.ipa > SHA256SUMS.txt
           printf 'Commit: %s\nMinimum iOS: 15.5\nUnsigned: re-sign before sideloading\n' "$GITHUB_SHA" > BUILD.txt
+          xcodebuild -version >> BUILD.txt
+          swift --version >> BUILD.txt
+          plutil -extract CFBundleShortVersionString raw -o - DerivedData/Build/Products/Release-iphoneos/Pickt.app/Info.plist >> BUILD.txt
+          test "$(plutil -extract MinimumOSVersion raw -o - DerivedData/Build/Products/Release-iphoneos/Pickt.app/Info.plist)" = "15.5"
       - uses: actions/upload-artifact@v4
         with:
           name: Pickt-unsigned-ipa
@@ -36,3 +40,17 @@ jobs:
             build/Pickt-unsigned.ipa
             build/SHA256SUMS.txt
             build/BUILD.txt
+      - name: Build simulator and capture empty library
+        run: |
+          xcodebuild -project Pickt.xcodeproj -scheme Pickt -configuration Debug -sdk iphonesimulator -derivedDataPath build/Simulator CODE_SIGNING_ALLOWED=NO build
+          SIM_ID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for group in d["devices"].values() for x in group if "iPhone" in x["name"]))')
+          xcrun simctl boot "$SIM_ID"
+          xcrun simctl bootstatus "$SIM_ID" -b
+          xcrun simctl install "$SIM_ID" build/Simulator/Build/Products/Debug-iphonesimulator/Pickt.app
+          xcrun simctl launch "$SIM_ID" com.wenna.pickt
+          sleep 4
+          xcrun simctl io "$SIM_ID" screenshot build/first-launch.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pickt-simulator-preview
+          path: build/first-launch.png

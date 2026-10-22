@@ -4,7 +4,11 @@ import UniformTypeIdentifiers
 struct SettingsView:View {
     @EnvironmentObject var store:AppStore
     @Environment(\.dismiss) var dismiss
-    @State private var share:SharedFile?,importing=false,restoreURL:URL?,confirm=false,working=false
+    @State private var share:SharedFile?
+    @State private var importing=false
+    @State private var restoreURL:URL?
+    @State private var confirm=false
+    @State private var working=false
     var body:some View{NavigationView{List{
         Section("资料管理"){NavigationLink("最近删除（可恢复）"){TrashView()};NavigationLink("来源试卷"){List(store.library.sources){source in NavigationLink(source.title){SourceDetail(source:source)}}.navigationTitle("来源试卷")}}
         Section("备份与恢复"){Button(working ? "处理中…":"导出完整备份"){working=true;Task{if let url=await store.exportBackup(){share=SharedFile(url:url)};working=false}}.disabled(working);Button("从文件恢复备份"){importing=true}.disabled(working);NavigationLink("恢复前安全备份"){SafetyBackupsView()};Text("备份包含原图与练习记录。请存到文件 App 或电脑。恢复前会在 App 内保留一份当前资料安全备份。").font(.footnote)}
@@ -14,7 +18,10 @@ struct SettingsView:View {
 }
 struct SafetyBackupsView:View {
     @EnvironmentObject var store:AppStore
-    @State private var urls:[URL]=[],share:SharedFile?,candidate:URL?,confirm=false
+    @State private var urls:[URL]=[]
+    @State private var share:SharedFile?
+    @State private var candidate:URL?
+    @State private var confirm=false
     var body:some View{List{if urls.isEmpty{Text("暂无恢复前备份")};ForEach(urls,id:\.self){url in VStack(alignment:.leading){Text((try? url.resourceValues(forKeys:[.creationDateKey]).creationDate)?.formatted() ?? url.lastPathComponent).font(.caption);HStack{Button("导出"){share=SharedFile(url:url)}.buttonStyle(.bordered);Button("恢复此备份"){candidate=url;confirm=true}.buttonStyle(.bordered)}}}}.navigationTitle("恢复前安全备份").onAppear{if let root=store.assets?.root.deletingLastPathComponent(){urls=((try? FileManager.default.contentsOfDirectory(at:root,includingPropertiesForKeys:[.creationDateKey])) ?? []).filter{$0.lastPathComponent.hasPrefix("BeforeRestore-") && $0.pathExtension=="picktbackup"}.sorted{$0.lastPathComponent<$1.lastPathComponent}}}.sheet(item:$share){ShareSheet(url:$0.url)}.alert("恢复此安全备份？",isPresented:$confirm){Button("取消",role:.cancel){};Button("校验并恢复",role:.destructive){if let url=candidate{Task{_ = await store.restoreBackup(url)}}}}message:{Text("会先保留当前资料安全备份，再替换资料库。")}}
 }
 struct TrashView:View {

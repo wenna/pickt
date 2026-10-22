@@ -2,10 +2,14 @@ import SwiftUI
 
 struct PracticeView:View {
     @EnvironmentObject var store:AppStore
-    @State private var tab=0, count=5
+    @State private var tab=0
+    @State private var count=5
     @State private var filter=QuestionFilter()
-    @State private var selected=Set<UUID>(), selectedPapers=Set<UUID>()
-    @State private var filtering=false,managing=false,confirm=false
+    @State private var selected=Set<UUID>()
+    @State private var selectedPapers=Set<UUID>()
+    @State private var filtering=false
+    @State private var managing=false
+    @State private var confirm=false
     var body:some View {NavigationView{VStack{
         Picker("练一练",selection:$tab){Text("选题组卷").tag(0);Text("我的练习卷").tag(1)}.pickerStyle(.segmented).padding(.horizontal)
         if tab==0 {List{
@@ -20,8 +24,13 @@ struct PracticeView:View {
 struct PaperDetail:View {
     @EnvironmentObject var store:AppStore
     var id:UUID
-    @State private var title="",layoutID:UUID?,space=AnswerSpace.medium,part=PDFPart.student
-    @State private var duplex=false,confirm=false,working=false
+    @State private var title=""
+    @State private var layoutID:UUID?
+    @State private var space=AnswerSpace.medium
+    @State private var part=PDFPart.student
+    @State private var duplex=false
+    @State private var confirm=false
+    @State private var working=false
     @State private var output:SharedFile?
     var paper:Paper?{store.library.papers.first{$0.id==id}}
     var body:some View{Group{if let p=paper{List{

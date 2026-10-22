@@ -11,6 +11,10 @@ import datetime
 import http.client
 import time
 import json
+import io
+import zipfile
+import plistlib
+import hashlib
 import os
 import re
 import subprocess
@@ -39,7 +43,7 @@ def login():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", choices=["status", "logs", "publish", "dispatch"])
+    parser.add_argument("action", choices=["status", "logs", "publish", "dispatch", "artifacts"])
     parser.add_argument("--ref", default="HEAD")
     parser.add_argument("--branch", default="feat/native-mvp")
     parser.add_argument("--run", type=int)
@@ -67,6 +71,30 @@ def main():
     if args.action == "status":
         runs=api("/actions/runs?branch="+args.branch+"&per_page=4")["workflow_runs"]
         print(json.dumps([{k:r[k] for k in ["id","status","conclusion","head_sha","html_url"]} for r in runs], indent=2))
+        return
+    if args.action == "artifacts":
+        if not args.run: parser.error("--run is required")
+        artifacts=api(f"/actions/runs/{args.run}/artifacts")["artifacts"]
+        for item in artifacts:
+            print("ARTIFACT",item["id"],item["name"],item["size_in_bytes"],"expired",item["expired"])
+            if item["expired"]: continue
+            archive=zipfile.ZipFile(io.BytesIO(api(f'/actions/artifacts/{item["id"]}/zip',raw=True)))
+            if item['name']=='Pickt-simulator-preview':
+                from pathlib import Path
+                dest=Path('.local-data/ci');dest.mkdir(parents=True,exist_ok=True)
+                (dest/'first-launch.png').write_bytes(archive.read('first-launch.png'))
+                print('SCREENSHOT',str((dest/'first-launch.png').resolve()))
+                continue
+            ipa=next(name for name in archive.namelist() if name.endswith('.ipa'))
+            binary=archive.read(ipa)
+            digest=hashlib.sha256(binary).hexdigest()
+            expected=archive.read('SHA256SUMS.txt').decode().split()[0]
+            if digest!=expected: raise RuntimeError("IPA checksum mismatch")
+            app=zipfile.ZipFile(io.BytesIO(binary))
+            info=plistlib.loads(app.read('Payload/Pickt.app/Info.plist'))
+            if info['MinimumOSVersion']!='15.5': raise RuntimeError('Unexpected deployment target')
+            print("VERIFIED",digest,info['CFBundleIdentifier'],info['CFBundleShortVersionString'],"iOS",info['MinimumOSVersion'])
+            print(archive.read('BUILD.txt').decode())
         return
     if args.action == "logs":
         if not args.run: parser.error("--run is required")
