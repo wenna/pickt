@@ -217,11 +217,12 @@ final class CropSurface:UIView,UIScrollViewDelegate {
         let size=picture.bounds.size
         guard size.width>0,size.height>0 else{return}
         let raw=gesture.location(in:picture)
-        let point=CropPoint(x:min(max(0,raw.x/size.width),1),y:min(max(0,raw.y/size.height),1))
+        let point=CropPoint(x:raw.x/size.width,y:raw.y/size.height)
         switch gesture.state {
         case .began:
             let zoom=max(scroll.zoomScale,0.001)
-            interaction=CropInteraction(selection:selected,start:point,toleranceX:22/(size.width*zoom),toleranceY:22/(size.height*zoom),minimumWidth:16/(size.width*zoom),minimumHeight:16/(size.height*zoom),drawOnly:drawOnly)
+            let start=CropPoint(x:min(max(0,point.x),1),y:min(max(0,point.y),1))
+            interaction=CropInteraction(selection:selected,start:start,toleranceX:22/(size.width*zoom),toleranceY:22/(size.height*zoom),minimumWidth:16/(size.width*zoom),minimumHeight:16/(size.height*zoom),drawOnly:drawOnly)
         case .changed:
             if let interaction=interaction {selected=interaction.updated(to:point);drawSelection()}
         case .ended:

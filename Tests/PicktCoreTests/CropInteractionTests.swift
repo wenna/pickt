@@ -71,4 +71,10 @@ final class CropInteractionTests:XCTestCase {
         XCTAssertEqual(result.width,0.5,accuracy:0.0001)
         XCTAssertEqual(result.x,box.x);XCTAssertEqual(result.height,box.height)
     }
+    func testOffsetHandleCanReachImageBoundaryWhenFingerGoesOutside() {
+        let drag=CropInteraction(selection:box,start:.init(x:0.62,y:0.4),toleranceX:0.03,toleranceY:0.03)
+        let result=drag.updated(to:.init(x:1.2,y:0.4))
+        XCTAssertEqual(result.x+result.width,1,accuracy:0.0001)
+        XCTAssertEqual(result.x,box.x);XCTAssertEqual(result.height,box.height)
+    }
 }
