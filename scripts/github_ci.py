@@ -82,8 +82,11 @@ def main():
             if item['name']=='Pickt-simulator-preview':
                 from pathlib import Path
                 dest=Path('.local-data/ci');dest.mkdir(parents=True,exist_ok=True)
-                (dest/'first-launch.png').write_bytes(archive.read('first-launch.png'))
-                print('SCREENSHOT',str((dest/'first-launch.png').resolve()))
+                for name in archive.namelist():
+                    if name.endswith('.png'):
+                        path=dest/Path(name).name
+                        path.write_bytes(archive.read(name))
+                        print('SCREENSHOT',str(path.resolve()))
                 continue
             ipa=next(name for name in archive.namelist() if name.endswith('.ipa'))
             binary=archive.read(ipa)

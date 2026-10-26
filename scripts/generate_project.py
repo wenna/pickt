@@ -20,8 +20,9 @@ def generate():
     resources=obj('resources','isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0;')
     configs=[]
     for name in ['Debug','Release']:
-        settings='IPHONEOS_DEPLOYMENT_TARGET = 15.5; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; PRODUCT_NAME = Pickt; PRODUCT_BUNDLE_IDENTIFIER = com.wenna.pickt; INFOPLIST_FILE = PicktApp/Info.plist; CURRENT_PROJECT_VERSION = 1; MARKETING_VERSION = 0.1; CODE_SIGN_STYLE = Automatic;'
+        settings='IPHONEOS_DEPLOYMENT_TARGET = 15.5; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; PRODUCT_NAME = Pickt; PRODUCT_BUNDLE_IDENTIFIER = com.wenna.pickt; INFOPLIST_FILE = PicktApp/Info.plist; CURRENT_PROJECT_VERSION = 2; MARKETING_VERSION = 0.1.1; CODE_SIGN_STYLE = Automatic;'
         settings+=' SWIFT_OPTIMIZATION_LEVEL = '+('"-Onone";' if name=='Debug' else '"-O";')
+        if name=='Debug': settings+=' SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;'
         configs.append(obj('config'+name,f'isa = XCBuildConfiguration; buildSettings = {{ {settings} }}; name = {name};'))
     configlist=obj('configlist',f'isa = XCConfigurationList; buildConfigurations = ({",".join(configs)},); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;')
     target=obj('target',f'isa = PBXNativeTarget; buildConfigurationList = {configlist}; buildPhases = ({phase},{resources},); buildRules = (); dependencies = (); name = Pickt; productName = Pickt; productReference = {product}; productType = "com.apple.product-type.application";')

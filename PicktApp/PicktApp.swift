@@ -2,7 +2,14 @@ import SwiftUI
 
 @main struct PicktApp: App {
     @StateObject private var store=AppStore()
-    var body:some Scene { WindowGroup { RootView().environmentObject(store).tint(Theme.blue) } }
+    var body:some Scene { WindowGroup { content.environmentObject(store).tint(Theme.blue) } }
+    @ViewBuilder private var content:some View {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--crop-preview") { CropDebugPreview() } else { RootView() }
+        #else
+        RootView()
+        #endif
+    }
 }
 struct RootView: View {
     @EnvironmentObject var store:AppStore

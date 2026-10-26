@@ -104,10 +104,10 @@ struct CaptureFlow:View {
     @State private var editingFragment:Int?
     var body:some View {
         NavigationView{VStack(spacing:10){
-            Text("一指框选，双指平移或缩放；同一题可添加多个片段。").font(.footnote).foregroundColor(.secondary)
+            Text("先拖动框选；框内移动、圆点调大小；框外重画，双指缩放。").font(.footnote).foregroundColor(.secondary)
             Picker("原卷页",selection:$page){ForEach(images.indices,id:\.self){Text("第 \($0+1) 页").tag($0)}}.pickerStyle(.segmented).onChange(of:page){_ in rect=NormalizedRect()}
             CropCanvas(image:images[page],rect:$rect).background(Color.secondary.opacity(0.08)).frame(maxWidth:.infinity,maxHeight:.infinity)
-            HStack{Button("旋转本页"){images[page]=images[page].rotated();originalNames[page]=nil;rect=NormalizedRect()};Spacer();Button(processing ? "正在读取…" : "加入当前题片段"){addFragment()}.disabled(processing)}
+            HStack{Button("重置选框"){rect=NormalizedRect()};Button("旋转本页"){images[page]=images[page].rotated();originalNames[page]=nil;rect=NormalizedRect()};Spacer();Button(processing ? "正在读取…" : "加入当前题片段"){addFragment()}.disabled(processing)}
             ScrollView(.horizontal){HStack{ForEach(Array(draft.fragments.enumerated()),id:\.element.id){index,fragment in Button{editingFragment=index}label:{VStack{AssetImage(name:fragment.asset).frame(width:90,height:70);Text("片段 \(index+1) · 可遮盖").font(.caption2)}}}}}.frame(height:draft.fragments.isEmpty ? 0 : 100)
             Button("下一步：分类保存（\(draft.fragments.count) 个片段）"){editor=true}.buttonStyle(.borderedProminent).disabled(draft.fragments.isEmpty || processing)
             Text("已保存 \(savedCount) 道题，保存后可继续选下一题").font(.caption).foregroundColor(.secondary)
@@ -137,21 +137,104 @@ struct CaptureFlow:View {
 struct CropCanvas:UIViewRepresentable {
     var image:UIImage
     @Binding var rect:NormalizedRect
-    func makeUIView(context:Context)->CropSurface { let view=CropSurface();view.changed={rect=$0};return view }
-    func updateUIView(_ view:CropSurface,context:Context){view.changed={rect=$0};view.set(image:image,selection:rect)}
+    var drawOnly=false
+    func makeUIView(context:Context)->CropSurface {
+        let view=CropSurface();view.changed={rect=$0};return view
+    }
+    func updateUIView(_ view:CropSurface,context:Context) {
+        view.changed={rect=$0};view.drawOnly=drawOnly;view.set(image:image,selection:rect)
+    }
 }
 final class CropSurface:UIView,UIScrollViewDelegate {
-    private let scroll=UIScrollView(),picture=UIImageView(),selectionLayer=CAShapeLayer()
-    private var start=CGPoint.zero,selected=NormalizedRect(),needsFit=true
+    private let scroll=UIScrollView()
+    private let picture=UIImageView()
+    private let selectionLayer=CAShapeLayer()
+    private let handlesLayer=CAShapeLayer()
+    private var selected=NormalizedRect()
+    private var interaction:CropInteraction?
+    private var needsFit=true
+    private var fittedSize=CGSize.zero
+    var drawOnly=false
     var changed:((NormalizedRect)->Void)?
-    override init(frame:CGRect){super.init(frame:frame);addSubview(scroll);scroll.addSubview(picture);scroll.delegate=self;scroll.panGestureRecognizer.minimumNumberOfTouches=2;picture.isUserInteractionEnabled=true;picture.layer.addSublayer(selectionLayer);selectionLayer.strokeColor=UIColor.systemBlue.cgColor;selectionLayer.fillColor=UIColor.systemBlue.withAlphaComponent(0.12).cgColor;let pan=UIPanGestureRecognizer(target:self,action:#selector(selectArea(_:)));pan.maximumNumberOfTouches=1;picture.addGestureRecognizer(pan)}
+
+    override init(frame:CGRect) {
+        super.init(frame:frame)
+        addSubview(scroll);scroll.addSubview(picture);scroll.delegate=self
+        scroll.panGestureRecognizer.minimumNumberOfTouches=2
+        picture.isUserInteractionEnabled=true
+        picture.layer.addSublayer(selectionLayer);picture.layer.addSublayer(handlesLayer)
+        selectionLayer.strokeColor=UIColor.systemBlue.cgColor
+        selectionLayer.fillColor=UIColor.systemBlue.withAlphaComponent(0.06).cgColor
+        handlesLayer.strokeColor=UIColor.systemBlue.cgColor
+        handlesLayer.fillColor=UIColor.white.cgColor
+        let pan=UIPanGestureRecognizer(target:self,action:#selector(selectArea(_:)))
+        pan.maximumNumberOfTouches=1;picture.addGestureRecognizer(pan)
+        isAccessibilityElement=true;accessibilityIdentifier="crop.canvas"
+        accessibilityLabel="试卷框选画布"
+    }
     required init?(coder:NSCoder){fatalError("init(coder:) is unsupported")}
-    func set(image:UIImage,selection:NormalizedRect){if picture.image !== image{scroll.minimumZoomScale=min(scroll.minimumZoomScale,1);scroll.maximumZoomScale=max(scroll.maximumZoomScale,1);scroll.setZoomScale(1,animated:false);picture.transform = .identity;picture.image=image;picture.bounds=CGRect(origin:.zero,size:image.size);picture.center=CGPoint(x:image.size.width/2,y:image.size.height/2);scroll.contentSize=image.size;scroll.contentOffset = .zero;needsFit=true};selected=selection;setNeedsLayout()}
-    override func layoutSubviews(){super.layoutSubviews();scroll.frame=bounds;if needsFit,bounds.width>0,bounds.height>0,let image=picture.image{let scale=min(bounds.width/image.size.width,bounds.height/image.size.height);scroll.minimumZoomScale=scale;scroll.maximumZoomScale=scale*6;scroll.zoomScale=scale;needsFit=false};drawSelection()}
+    func set(image:UIImage,selection:NormalizedRect) {
+        if picture.image !== image {
+            interaction=nil
+            scroll.minimumZoomScale=min(scroll.minimumZoomScale,1)
+            scroll.maximumZoomScale=max(scroll.maximumZoomScale,1)
+            scroll.setZoomScale(1,animated:false);picture.transform = .identity
+            picture.image=image;picture.bounds=CGRect(origin:.zero,size:image.size)
+            picture.center=CGPoint(x:image.size.width/2,y:image.size.height/2)
+            scroll.contentSize=image.size;scroll.contentOffset = .zero;needsFit=true
+        }
+        // During a drag, SwiftUI can re-render using an older binding value.
+        if interaction == nil {selected=selection}
+        setNeedsLayout()
+    }
+    override func layoutSubviews() {
+        super.layoutSubviews();scroll.frame=bounds
+        if (needsFit || fittedSize != bounds.size),bounds.width>0,bounds.height>0,let image=picture.image {
+            needsFit=false;fittedSize=bounds.size
+            let scale=min(bounds.width/image.size.width,bounds.height/image.size.height)
+            scroll.minimumZoomScale=scale;scroll.maximumZoomScale=max(1,scale*6)
+            scroll.setZoomScale(scale,animated:false)
+        }
+        drawSelection()
+    }
     func viewForZooming(in scrollView:UIScrollView)->UIView?{picture}
     func scrollViewDidZoom(_ scrollView:UIScrollView){drawSelection()}
-    private func drawSelection(){let size=picture.bounds.size;selectionLayer.lineWidth=2/max(scroll.zoomScale,0.01);selectionLayer.path=UIBezierPath(rect:CGRect(x:selected.x*size.width,y:selected.y*size.height,width:selected.width*size.width,height:selected.height*size.height)).cgPath}
-    @objc private func selectArea(_ gesture:UIPanGestureRecognizer){let point=gesture.location(in:picture),size=picture.bounds.size;guard size.width>0,size.height>0 else{return};let p=CGPoint(x:min(max(0,point.x),size.width),y:min(max(0,point.y),size.height));if gesture.state == .began{start=p};let r=NormalizedRect(x:min(start.x,p.x)/size.width,y:min(start.y,p.y)/size.height,width:abs(p.x-start.x)/size.width,height:abs(p.y-start.y)/size.height);selected=r;drawSelection();if gesture.state == .ended{changed?(r)}}
+    private func drawSelection() {
+        let size=picture.bounds.size,zoom=max(scroll.zoomScale,0.001)
+        let box=CGRect(x:selected.x*size.width,y:selected.y*size.height,width:selected.width*size.width,height:selected.height*size.height)
+        selectionLayer.lineWidth=2/zoom;selectionLayer.path=UIBezierPath(rect:box).cgPath
+        let path=UIBezierPath(),radius=6/zoom
+        if !drawOnly {
+            for handle in CropHandle.allCases {
+                let p=handle.point(in:selected)
+                path.append(UIBezierPath(ovalIn:CGRect(x:p.x*size.width-radius,y:p.y*size.height-radius,width:radius*2,height:radius*2)))
+            }
+        }
+        handlesLayer.lineWidth=1.5/zoom;handlesLayer.path=path.cgPath
+        accessibilityValue=String(format:"%.3f,%.3f,%.3f,%.3f",selected.x,selected.y,selected.width,selected.height)
+    }
+    @objc private func selectArea(_ gesture:UIPanGestureRecognizer) {
+        let size=picture.bounds.size
+        guard size.width>0,size.height>0 else{return}
+        let raw=gesture.location(in:picture)
+        let point=CropPoint(x:min(max(0,raw.x/size.width),1),y:min(max(0,raw.y/size.height),1))
+        switch gesture.state {
+        case .began:
+            let zoom=max(scroll.zoomScale,0.001)
+            interaction=CropInteraction(selection:selected,start:point,toleranceX:22/(size.width*zoom),toleranceY:22/(size.height*zoom),minimumWidth:16/(size.width*zoom),minimumHeight:16/(size.height*zoom),drawOnly:drawOnly)
+        case .changed:
+            if let interaction=interaction {selected=interaction.updated(to:point);drawSelection()}
+        case .ended:
+            if let drag=interaction {
+                let proposed=drag.updated(to:point)
+                selected=proposed.width*size.width*scroll.zoomScale>=8 && proposed.height*size.height*scroll.zoomScale>=8 ? proposed:drag.original
+                interaction=nil;drawSelection();changed?(selected)
+            }
+        case .cancelled,.failed:
+            if let drag=interaction {selected=drag.original;interaction=nil;drawSelection();changed?(selected)}
+        default:break
+        }
+    }
 }
 
 struct MaskEditor:View {
@@ -160,5 +243,5 @@ struct MaskEditor:View {
     var save:(UIImage)->Void
     @State private var rect=NormalizedRect()
     @State private var undo:[UIImage]=[]
-    var body:some View {NavigationView{VStack{Text("框选要遮盖的笔迹后点遮盖。遮住题干时请撤销。原图始终保留。").font(.footnote);CropCanvas(image:image,rect:$rect);HStack{Button("撤销"){if let previous=undo.popLast(){image=previous}}.disabled(undo.isEmpty);Spacer();Button("用白色遮盖所选区域"){undo.append(image);if undo.count>6{undo.removeFirst()};let original=image;let format=UIGraphicsImageRendererFormat();format.scale=1;image=UIGraphicsImageRenderer(size:image.size,format:format).image{ctx in original.draw(at:.zero);UIColor.white.setFill();ctx.fill(CGRect(x:rect.x*original.size.width,y:rect.y*original.size.height,width:rect.width*original.size.width,height:rect.height*original.size.height))}}}.padding()}.padding().navigationTitle("手动遮盖").toolbar{ToolbarItem(placement:.cancellationAction){Button("取消"){dismiss()}};ToolbarItem(placement:.confirmationAction){Button("保留修改"){save(image);dismiss()}}}}.navigationViewStyle(.stack)}
+    var body:some View {NavigationView{VStack{Text("框选要遮盖的笔迹后点遮盖。遮住题干时请撤销。原图始终保留。").font(.footnote);CropCanvas(image:image,rect:$rect,drawOnly:true);HStack{Button("撤销"){if let previous=undo.popLast(){image=previous}}.disabled(undo.isEmpty);Spacer();Button("用白色遮盖所选区域"){undo.append(image);if undo.count>6{undo.removeFirst()};let original=image;let format=UIGraphicsImageRendererFormat();format.scale=1;image=UIGraphicsImageRenderer(size:image.size,format:format).image{ctx in original.draw(at:.zero);UIColor.white.setFill();ctx.fill(CGRect(x:rect.x*original.size.width,y:rect.y*original.size.height,width:rect.width*original.size.width,height:rect.height*original.size.height))}}}.padding()}.padding().navigationTitle("手动遮盖").toolbar{ToolbarItem(placement:.cancellationAction){Button("取消"){dismiss()}};ToolbarItem(placement:.confirmationAction){Button("保留修改"){save(image);dismiss()}}}}.navigationViewStyle(.stack)}
 }

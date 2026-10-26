@@ -50,7 +50,13 @@ jobs:
           xcrun simctl launch "$SIM_ID" com.wenna.pickt
           sleep 4
           xcrun simctl io "$SIM_ID" screenshot build/first-launch.png
+          xcrun simctl terminate "$SIM_ID" com.wenna.pickt
+          xcrun simctl launch "$SIM_ID" com.wenna.pickt --crop-preview
+          sleep 3
+          xcrun simctl io "$SIM_ID" screenshot build/crop-preview.png
       - uses: actions/upload-artifact@v4
         with:
           name: Pickt-simulator-preview
-          path: build/first-launch.png
+          path: |
+            build/first-launch.png
+            build/crop-preview.png
