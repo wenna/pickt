@@ -44,3 +44,7 @@ V2.4 基线已保存为独立提交，后续每个完成的逻辑改动均有独
 ## 2026-10-26 框选改进
 
 0.1.1 / build 2 修复选框移动和八手柄调整，37 项原生测试及设备/模拟器构建已通过，下载 https://github.com/wenna/pickt/actions/runs/40261836085 。验证记录见 [开发记录](docs/native-progress.md)。CI 新增虚构试卷的选框截图（仅 Debug 预览，不写入资料库），自动分题/答案照片/卡片 UI 仍是 [待确认建议](docs/capture-answer-proposal.md)。原生测试和构建命令不变。
+
+## 2026-11-09 收题 Demo 增补
+
+[当前 Demo](outputs/shiti-demo-v2.4.html) 新增预置分题后的＋多选、改框/补框、合并片段及批量保存流程。界面明确为模拟，不代表原生已接入 OCR 或模型。操作见[演示说明](outputs/演示使用说明.md)，实现与验证记录见[本轮计划](docs/superpowers/plans/2026-11-09-capture-demo.md)。新增检查：`node --test work/verify-capture.cjs`；其余构建与检查命令不变。本轮无需密钥，不生成 IPA。
