@@ -37,4 +37,10 @@ final class SegmentationTests:XCTestCase {
         s.selected.insert(b.id);s.merge();s.unmerge(s.candidates[0].id);s.unmerge(merged)
         XCTAssertEqual(s.candidates,[a,b,c]);XCTAssertEqual(s.selected.count,3)
     }
+    func testIndependentMergesCanBeUndoneInEitherOrder() {
+        var s=CaptureSession();let originals=(1...4).map{CaptureCandidate(page:0,number:String($0),text:"",regions:[.init()])}
+        s.append(originals);s.selected=[originals[0].id,originals[2].id];s.merge();let ac=s.candidates[0].id
+        s.selected=[originals[1].id,originals[3].id];s.merge();let bd=s.candidates.first{!$0.originals.isEmpty && $0.id != ac}!.id
+        s.unmerge(ac);s.unmerge(bd);XCTAssertEqual(s.candidates,originals)
+    }
 }
