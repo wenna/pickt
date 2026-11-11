@@ -89,7 +89,7 @@ struct CaptureHome:View {
     }
 }
 
-struct CaptureFlow:View {
+struct ManualCaptureFlow:View {
     @EnvironmentObject var store:AppStore
     @State var images:[UIImage]
     var finish:()->Void
