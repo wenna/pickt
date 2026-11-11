@@ -11,6 +11,7 @@ public struct CaptureCandidate:Identifiable,Equatable {
     public var text:String
     public var pieces:[CapturePiece]
     public var originals:[CaptureCandidate]=[]
+    public var originalIndices:[Int]=[]
     public var regions:[NormalizedRect]{pieces.map(\.rect)}
     public init(page:Int,number:String,text:String,regions:[NormalizedRect]){self.number=number;self.text=text;self.pieces=regions.map{CapturePiece(page:page,rect:$0)}}
 }
@@ -22,15 +23,16 @@ public struct CaptureSession {
     public mutating func toggle(_ id:UUID){guard candidates.contains(where:{$0.id==id}) else{return};if !selected.insert(id).inserted{selected.remove(id)}}
     public mutating func merge(){
         let items=candidates.filter{selected.contains($0.id)};guard items.count>1 else{return}
-        var merged=items[0];merged.id=UUID();merged.originals=items;merged.pieces=items.flatMap(\.pieces)
+        var merged=items[0];merged.id=UUID();merged.originals=items;merged.originalIndices=candidates.indices.filter{selected.contains(candidates[$0].id)};merged.pieces=items.flatMap(\.pieces)
         merged.number=items.map(\.number).joined(separator:"＋");merged.text=items.map(\.text).joined(separator:"\n")
         let index=candidates.firstIndex{$0.id==items[0].id} ?? 0
         candidates.removeAll{selected.contains($0.id)};candidates.insert(merged,at:min(index,candidates.count));selected=[merged.id]
     }
     public mutating func unmerge(_ id:UUID){
         guard let index=candidates.firstIndex(where:{$0.id==id}),!candidates[index].originals.isEmpty else{return}
-        let originals=candidates[index].originals,wasSelected=selected.remove(id) != nil
-        candidates.replaceSubrange(index...index,with:originals);if wasSelected{selected.formUnion(originals.map(\.id))}
+        let originals=candidates[index].originals,positions=candidates[index].originalIndices,wasSelected=selected.remove(id) != nil
+        candidates.remove(at:index)
+        for (offset,item) in originals.enumerated(){candidates.insert(item,at:min(offset<positions.count ? positions[offset]:index+offset,candidates.count))};if wasSelected{selected.formUnion(originals.map(\.id))}
     }
     public mutating func remove(_ id:UUID){candidates.removeAll{$0.id==id};selected.remove(id)}
 }

@@ -29,7 +29,7 @@ struct CaptureFlow:View {
         .toolbar{ToolbarItem(placement:.cancellationAction){Button(reviewing ? "返回选题":"完成"){if reviewing{reviewing=false}else{work?.cancel();finish()}}.disabled(processing)};ToolbarItem(placement:.navigationBarTrailing){Button("识别设置"){settings=true}.disabled(processing)}}
         .safeAreaInset(edge:.bottom){bottomBar}
         }.navigationViewStyle(.stack)
-        .fullScreenCover(isPresented:$manual){ManualCaptureFlow(images:images){manual=false;finish()}}
+        .fullScreenCover(isPresented:$manual){ManualCaptureFlow(images:images){manual=false}}
         .sheet(isPresented:$batchClassification){QuestionEditor(question:Question(text:"仅统一分类，不修改题图、文字与答案")){q in
             for i in questions.indices{questions[i].subject=q.subject;questions[i].grade=q.grade;questions[i].topics=q.topics;questions[i].causes=q.causes;retainedDrafts[questions[i].id]=questions[i]};return true
         }}
@@ -93,13 +93,15 @@ struct CaptureFlow:View {
                     let original:String;if let old=assets[piece.page]{original=old}else{original=try store.saveImage(images[piece.page]);assets[piece.page]=original}
                     q.fragments.append(QuestionFragment(asset:try store.saveImage(image),originalAsset:original,crop:piece.rect))
                 }
-                if q.topics.isEmpty{q.topics=OCRService.suggestedTopics(q.text)};next.append(q)
+                if previous[candidate.id]==nil{q.topics=OCRService.suggestedTopics(q.text)};next.append(q)
             }
             questions=next;reviewing=true
         }catch{self.error=error.localizedDescription}}
     }
     private func save(){
         guard !questions.isEmpty else{return};processing=true
+        do{for index in images.indices where assets[index]==nil{assets[index]=try store.saveImage(images[index])}}
+        catch{self.error=error.localizedDescription;processing=false;return}
         let batch=questions;var document=source;document.pages=assets.sorted{$0.key<$1.key}.map(\.value)
         work=Task{defer{processing=false};if await store.change({lib in
             if !lib.sources.contains(where:{$0.id==document.id}){lib.sources.append(document)}

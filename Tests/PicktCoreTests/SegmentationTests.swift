@@ -30,4 +30,11 @@ final class SegmentationTests:XCTestCase {
         s.append([CaptureCandidate(page:0,number:"1",text:"",regions:[.init()])])
         XCTAssertTrue(s.selected.contains(other.id));XCTAssertEqual(s.candidates.count,2)
     }
+    func testUnmergeNonAdjacentRestoresReadingOrder() {
+        var s=CaptureSession()
+        let a=CaptureCandidate(page:0,number:"1",text:"",regions:[.init()]),b=CaptureCandidate(page:0,number:"2",text:"",regions:[.init()]),c=CaptureCandidate(page:1,number:"3",text:"",regions:[.init()])
+        s.candidates=[a,b,c];s.selected=[a.id,c.id];s.merge();let merged=s.candidates[0].id
+        s.selected.insert(b.id);s.merge();s.unmerge(s.candidates[0].id);s.unmerge(merged)
+        XCTAssertEqual(s.candidates,[a,b,c]);XCTAssertEqual(s.selected.count,3)
+    }
 }
